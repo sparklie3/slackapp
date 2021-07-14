@@ -6,5 +6,4 @@ Setup instructions for get it running.
 3. Update Request URL for Interactivity & Shortcuts
 4. Run app
 
-Test out a commit
 Some example Python Slack apps: https://github.com/slackapi/bolt-python/blob/main/examples/message_events.py
