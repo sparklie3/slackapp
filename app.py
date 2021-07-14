@@ -1,6 +1,5 @@
 import os
-import logger #didn't import this before so logger didn't work
-# Use the package we installed
+import logger
 from slack_bolt import App
 from slack_sdk import WebClient
 from flask import jsonify
@@ -14,160 +13,269 @@ app = App(
 client = WebClient(token=os.environ.get("SLACK_BOT_TOKEN"))
 
 # Add functionality here
-@app.command("/start")
+@app.command("/cspal")
 def handle_command(body, ack, respond, client, logger):
-    # logger.debug(body) # there are different levels of logging, DEBUG, INFO, WARNING, ERROR, CRITICAL
+    logger.info(body) # there are different levels of logging, DEBUG, INFO, WARNING, ERROR, CRITICAL
     ack(#this is also part of the message acknol
         text="Accepted!",
         blocks=[
-            {
-                "type": "section",
-                "block_id": "b",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": ":white_check_mark: Accepted!",
-                },
-            }
-        ],
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "Journey",
+						"emoji": True
+					},
+					"value": "journey",
+					"action_id": "actionId-0"
+				}
+			]
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "Business Review",
+						"emoji": True
+					},
+					"value": "business-review",
+					"action_id": "actionId-1"
+				}
+			]
+		}
+	],
     )
 
     respond( #this is part of the msesage and handle a response id
-        blocks=[
-            {
-                "type": "section",
-                "block_id": "b",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "You can add a button alongside text in your message. ",
-                },
-                "accessory": {
-                    "type": "button",
-                    "action_id": "a",
-                    "text": {"type": "plain_text", "text": "Button"},
-                    "value": "submit",
-                },
-            }
-        ]
+        # blocks=[
+        #     {
+        #         "type": "section",
+        #         "block_id": "b",
+        #         "text": {
+        #             "type": "mrkdwn",
+        #             "text": "You can add a button alongside text in your message. ",
+        #         },
+        #         "accessory": {
+        #             "type": "button",
+        #             "action_id": "a",
+        #             "text": {"type": "plain_text", "text": "Button"},
+        #             "value": "submit",
+        #         },
+        #     }
+        # ]
     )
 
-    res = client.views_open(
+@app.action("actionId-1")
+def handle_action(body, ack, respond, logger):
+  logger.info(body)
+  ack()
+  respond( #this is part of the msesage and handle a response id
+        # blocks=[
+        #     {
+        #         "type": "section",
+        #         "block_id": "b",
+        #         "text": {
+        #             "type": "mrkdwn",
+        #             "text": "You can add a button alongside text in your message. ",
+        #         },
+        #         "accessory": {
+        #             "type": "button",
+        #             "action_id": "a",
+        #             "text": {"type": "plain_text", "text": "Button"},
+        #             "value": "submit",
+        #         },
+        #     }
+        # ]
+    )
+  # say("I see you clicked a button") #result in error, channel not found
+  res = client.views_open(
         trigger_id=body["trigger_id"], #required to kick of the modal view
         view={
-          "type": "modal",
-          "submit": {
-            "type": "plain_text",
-            "text": "Submit",
-            ""
-            "emoji": True
-          },
-          "close": {
-            "type": "plain_text",
-            "text": "Cancel",
-            "emoji": True
-          },
-          "title": {
-            "type": "plain_text",
-            "text": "Modal",
-            "emoji": True
-          },
-          "blocks": [
-            {
-              "type": "section",
-              "text": {
+              "type": "modal",
+              "title": {
                 "type": "plain_text",
-                "text": ":wave: Hey {user}!\n\n Tell me something about yourself",
-                "emoji": True
-              }
-            },
-            {
-              "type": "divider"
-            },
-            {
-              "type": "input",
-              "optional": True,
-              "label": {
-                "type": "plain_text",
-                "text": "Select a channel to post the result on",
-              },
-              "element": {
-                "action_id": "my_action_id",
-                "type": "conversations_select",
-                "default_to_current_conversation": True,
-                "response_url_enabled": True
-              },
-            },
-            {
-              "type": "input",
-              "label": {
-                "type": "plain_text",
-                "text": "What is the client's name?",
+                "text": "Business Review",
                 "emoji": True
               },
-              "element": {
-                "type": "plain_text_input",
-                "multiline": False
-              }
-            },
-            {
-              "type": "input",
-              "label": {
+              "submit": {
                 "type": "plain_text",
-                "text": "What the the client's tier (based on ARR)",
+                "text": "Send",
                 "emoji": True
               },
-              "element": {
-                "type": "multi_static_select",
-                "placeholder": {
-                  "type": "plain_text",
-                  "text": "Select a tier",
-                  "emoji": True
+              "close": {
+                "type": "plain_text",
+                "text": "Cancel",
+                "emoji": True
+              },
+              "blocks": [
+                {
+                  "type": "divider"
                 },
-                "options": [
-                  {
-                    "text": {
-                      "type": "plain_text",
-                      "text": ":one: Tier One",
-                      "emoji": True
-                    },
-                    "value": "value-1"
+                {
+                  "type": "input",
+                  "label": {
+                    "type": "plain_text",
+                    "text": "To"
                   },
-                  {
-                    "text": {
-                      "type": "plain_text",
-                      "text": ":two: Tier Two ",
-                      "emoji": True
-                    },
-                    "value": "value-2"
-                  },
-                  {
-                    "text": {
-                      "type": "plain_text",
-                      "text": ":three: Tier Three",
-                      "emoji": True
-                    },
-                    "value": "value-3"
+                  "element": {
+                    "action_id": "my_action_id",
+                    "type": "conversations_select",
+                    "default_to_current_conversation": True,
+                    "response_url_enabled": True
                   }
-                ]
-              }
+                },
+                {
+                  "type": "input",
+                  "element": {
+                    "type": "static_select",
+                    "placeholder": {
+                      "type": "plain_text",
+                      "text": "Select an item",
+                      "emoji": True
+                    },
+                    "options": [
+                      {
+                        "text": {
+                          "type": "plain_text",
+                          "text": "*this is plain_text text*",
+                          "emoji": True
+                        },
+                        "value": "value-0"
+                      },
+                      {
+                        "text": {
+                          "type": "plain_text",
+                          "text": "*this is plain_text text*",
+                          "emoji": True
+                        },
+                        "value": "value-1"
+                      },
+                      {
+                        "text": {
+                          "type": "plain_text",
+                          "text": "*this is plain_text text*",
+                          "emoji": True
+                        },
+                        "value": "value-2"
+                      }
+                    ],
+                    "action_id": "static_select-action"
+                  },
+                  "label": {
+                    "type": "plain_text",
+                    "text": "Customer",
+                    "emoji": True
+                  }
+                },
+                {
+                  "type": "input",
+                  "element": {
+                    "type": "static_select",
+                    "placeholder": {
+                      "type": "plain_text",
+                      "text": "Select an item",
+                      "emoji": True
+                    },
+                    "options": [
+                      {
+                        "text": {
+                          "type": "plain_text",
+                          "text": "*this is plain_text text*",
+                          "emoji": True
+                        },
+                        "value": "value-0"
+                      },
+                      {
+                        "text": {
+                          "type": "plain_text",
+                          "text": "*this is plain_text text*",
+                          "emoji": True
+                        },
+                        "value": "value-1"
+                      },
+                      {
+                        "text": {
+                          "type": "plain_text",
+                          "text": "*this is plain_text text*",
+                          "emoji": True
+                        },
+                        "value": "value-2"
+                      }
+                    ],
+                    "action_id": "static_select-action"
+                  },
+                  "label": {
+                    "type": "plain_text",
+                    "text": "Template",
+                    "emoji": True
+                  }
+                },
+                {
+                  "type": "input",
+                  "element": {
+                    "type": "static_select",
+                    "placeholder": {
+                      "type": "plain_text",
+                      "text": "Select an item",
+                      "emoji": True
+                    },
+                    "options": [
+                      {
+                        "text": {
+                          "type": "plain_text",
+                          "text": "*this is plain_text text*",
+                          "emoji": True
+                        },
+                        "value": "value-0"
+                      },
+                      {
+                        "text": {
+                          "type": "plain_text",
+                          "text": "*this is plain_text text*",
+                          "emoji": True
+                        },
+                        "value": "value-1"
+                      },
+                      {
+                        "text": {
+                          "type": "plain_text",
+                          "text": "*this is plain_text text*",
+                          "emoji": True
+                        },
+                        "value": "value-2"
+                      }
+                    ],
+                    "action_id": "static_select-action"
+                  },
+                  "label": {
+                    "type": "plain_text",
+                    "text": "Ask",
+                    "emoji": True
+                  }
+                },
+                {
+                  "type": "input",
+                  "optional": True,
+                  "element": {
+                    "type": "plain_text_input",
+                    "multiline": True,
+                    "action_id": "plain_text_input-action"
+                  },
+                  "label": {
+                    "type": "plain_text",
+                    "text": "Message",
+                    "emoji": True
+                  }
+                }
+              ]
             },
-            {
-              "type": "input",
-              "label": {
-                "type": "plain_text",
-                "text": "Anything else you want to tell us?",
-                "emoji": True
-              },
-              "element": {
-                "type": "plain_text_input",
-                "multiline": True
-              },
-              "optional": True
-            }
-          ]
-        },
     )
-
-
 
 
 # @app.view("view-id")
@@ -186,24 +294,24 @@ def handle_command(body, ack, respond, client, logger):
 #     )
 #     logger.debug(body["view"]["state"]["values"])
 
-@app.view("")
-def handle_submit(ack, body, logger):
-  ack(
-    {
-      "response_action": "clear" # this is how I handle closing all views
-    }
-  )
-  logger.info(body["view"]["state"]["values"])
-  # logger.info(body["view"]["my_action_id"]) ## This is wrong, but how do I get this specific action ID?
+# @app.view("")
+# def handle_submit(ack, body, logger):
+#   ack(
+#     {
+#       "response_action": "clear" # this is how I handle closing all views
+#     }
+#   )
+#   logger.info(body["view"]["state"]["values"])
+#   # logger.info(body["view"]["my_action_id"]) ## This is wrong, but how do I get this specific action ID?
 
-  # Call the conversations.list method using the WebClient
-  result = client.chat_postMessage(
-      channel="UARE1U8F8",
-      text="Hello world!"
-      # You could also use a blocks[] array to send richer content
-  )
-  # Print result, which includes information about the message (like TS)
-  print(result)
+#   # Call the conversations.list method using the WebClient
+#   result = client.chat_postMessage(
+#       channel="UARE1U8F8",
+#       text="Hello world!"
+#       # You could also use a blocks[] array to send richer content
+#   )
+#   # Print result, which includes information about the message (like TS)
+#   print(result)
 
 
 
