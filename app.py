@@ -1,5 +1,6 @@
 import os
 import logger
+import requests
 from slack_bolt import App
 from slack_sdk import WebClient
 from flask import jsonify
@@ -98,6 +99,7 @@ def handle_action(body, ack, respond, logger):
         trigger_id=body["trigger_id"], #required to kick of the modal view
         view={
               "type": "modal",
+              "callback_id": "business_review_submission",
               "title": {
                 "type": "plain_text",
                 "text": "Business Review",
@@ -186,7 +188,7 @@ def handle_action(body, ack, respond, logger):
                       {
                         "text": {
                           "type": "plain_text",
-                          "text": "*this is plain_text text*",
+                          "text": "*QBR Slide Deck*",
                           "emoji": True
                         },
                         "value": "value-0"
@@ -194,7 +196,7 @@ def handle_action(body, ack, respond, logger):
                       {
                         "text": {
                           "type": "plain_text",
-                          "text": "*this is plain_text text*",
+                          "text": "*Roadmap*",
                           "emoji": True
                         },
                         "value": "value-1"
@@ -202,7 +204,7 @@ def handle_action(body, ack, respond, logger):
                       {
                         "text": {
                           "type": "plain_text",
-                          "text": "*this is plain_text text*",
+                          "text": "*Forecast*",
                           "emoji": True
                         },
                         "value": "value-2"
@@ -229,7 +231,7 @@ def handle_action(body, ack, respond, logger):
                       {
                         "text": {
                           "type": "plain_text",
-                          "text": "*this is plain_text text*",
+                          "text": "*Feedback*",
                           "emoji": True
                         },
                         "value": "value-0"
@@ -237,7 +239,7 @@ def handle_action(body, ack, respond, logger):
                       {
                         "text": {
                           "type": "plain_text",
-                          "text": "*this is plain_text text*",
+                          "text": "*Metrics*",
                           "emoji": True
                         },
                         "value": "value-1"
@@ -245,7 +247,7 @@ def handle_action(body, ack, respond, logger):
                       {
                         "text": {
                           "type": "plain_text",
-                          "text": "*this is plain_text text*",
+                          "text": "*Strategy*",
                           "emoji": True
                         },
                         "value": "value-2"
@@ -278,6 +280,9 @@ def handle_action(body, ack, respond, logger):
     )
 
 
+# @app.view("")
+# def handle_action(ack, body, respond, logger):
+
 # @app.view("view-id")
 # def view_submission(ack, body, logger):
 #     ack(
@@ -294,15 +299,58 @@ def handle_action(body, ack, respond, logger):
 #     )
 #     logger.debug(body["view"]["state"]["values"])
 
-# @app.view("")
-# def handle_submit(ack, body, logger):
-#   ack(
-#     {
-#       "response_action": "clear" # this is how I handle closing all views
+@app.view("business_review_submission")
+def handle_submit(ack, body, response, logger):
+  logger.info(body["view"]["state"]["values"])
+  ack(
+    {
+      "response_action": "clear" # this is how I handle closing all views
+    }
+  )
+  send_message()
+
+def send_message():
+  channel_id = "UARE1U8F8"
+  # try:
+  # Call the conversations.list method using the WebClient
+  result = client.chat_postMessage(
+      channel=channel_id,
+      text="Hello world!"
+      # You could also use a blocks[] array to send richer content
+  )
+  # Print result, which includes information about the message (like TS)
+  print(result)
+
+  # except SlackApiError as e:
+  #     print(f"Error: {e}")
+
+
+
+# def send_message():
+#   url = "https://hooks.slack.com/actions/TARE1U89L/2292007155508/BPgkyyFXrRN6ik6s6B9A5zDH'"
+#   payload="\"text\": \"Thanks for your request, we'll process it and get back to you.\""
+#   headers = {
+#   'Content-Type': 'application/json',
 #     }
-#   )
-#   logger.info(body["view"]["state"]["values"])
-#   # logger.info(body["view"]["my_action_id"]) ## This is wrong, but how do I get this specific action ID?
+#   response = requests.request("POST", url, headers=headers, data=payload)
+#   print(response.text)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  # logger.info(body["view"]["my_action_id"]) ## This is wrong, but how do I get this specific action ID?
 
 #   # Call the conversations.list method using the WebClient
 #   result = client.chat_postMessage(
