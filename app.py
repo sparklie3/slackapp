@@ -291,14 +291,14 @@ def handle_submit(ack, body, response, logger):
   body_values = body["view"]["state"]["values"]
   for key in body_values:
     UUID.append(key) 
-  # logger.info(UUID)
+  logger.info(body_values)
  
   channel_id = body_values[UUID[0]]["conversation_01"]["selected_conversation"]
   customer = body_values[UUID[1]]["static_select-action"]["selected_option"]["text"]["text"]
   template = body_values[UUID[2]]["static_select-action"]["selected_option"]["text"]["text"]
   ask = body_values[UUID[3]]["static_select-action"]["selected_option"]["text"]["text"]
   try: 
-    message = body_values[UUID[3]]["static_select-action"]["selected_option"]["text"]["text"]
+    message = body_values[UUID[4]]["plain_text_input-action"]["value"]
   except:
     message = "Not provided" 
         
@@ -316,6 +316,7 @@ def send_message(channel_id,customer,template,ask,message):
   result = client.chat_postMessage(
       channel=channel_id,
       # blocks[] array to send richer content that's formatted
+      text = "There is a message",
       blocks = [
         {
           "type": "section",
