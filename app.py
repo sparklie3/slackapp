@@ -13,11 +13,11 @@ app = App(
 
 client = WebClient(token=os.environ.get("SLACK_BOT_TOKEN"))
 
-# Add functionality here
+# To listening to the slash command
 @app.command("/cspal")
 def handle_command(body, ack, respond, client, logger):
     logger.info(body) # there are different levels of logging, DEBUG, INFO, WARNING, ERROR, CRITICAL
-    ack(#this is also part of the message acknol
+    ack(
         text="Accepted!",
         blocks=[
 		{
@@ -126,7 +126,7 @@ def handle_action(body, ack, respond, logger):
                     "text": "To"
                   },
                   "element": {
-                    "action_id": "my_action_id",
+                    "action_id": "conversation_01",
                     "type": "conversations_select",
                     "default_to_current_conversation": True,
                     "response_url_enabled": True
@@ -280,43 +280,88 @@ def handle_action(body, ack, respond, logger):
     )
 
 
-# @app.view("")
-# def handle_action(ack, body, respond, logger):
 
-# @app.view("view-id")
-# def view_submission(ack, body, logger):
-#     ack(
-#         text="Submitted!",
-#         blocks=[
-#             {
-#                 "type": "section",
-#                 "text": {
-#                     "type": "mrkdwn",
-#                     "text": ":white_check_mark: Accepted!",
-#                 },
-#             }
-#         ],
-#     )
-#     logger.debug(body["view"]["state"]["values"])
 
+# This is the viewer to view the modal. The value inside is from the modal callback_id
 @app.view("business_review_submission")
 def handle_submit(ack, body, response, logger):
-  logger.info(body["view"]["state"]["values"])
+  
+  # Getting the UUID by creating a list
+  UUID = []
+  body_values = body["view"]["state"]["values"]
+  for key in body_values:
+    UUID.append(key) 
+  # logger.info(UUID)
+ 
+  channel_id = body_values[UUID[0]]["conversation_01"]["selected_conversation"]
+  customer = body_values[UUID[1]]["static_select-action"]["selected_option"]["text"]["text"]
+  template = body_values[UUID[2]]["static_select-action"]["selected_option"]["text"]["text"]
+  ask = body_values[UUID[3]]["static_select-action"]["selected_option"]["text"]["text"]
+  try: 
+    message = body_values[UUID[3]]["static_select-action"]["selected_option"]["text"]["text"]
+  except:
+    message = "Not provided" 
+        
   ack(
     {
-      "response_action": "clear" # this is how I handle closing all views
+      "response_action": "clear" # this is how I handle closing all views // Odd that when I commented this out, the view still closed. 
     }
   )
-  send_message()
 
-def send_message():
-  channel_id = "UARE1U8F8"
-  # try:
-  # Call the conversations.list method using the WebClient
+  #Bot sends a message, can't send to channel. Get this error: The server responded with: {'ok': False, 'error': 'not_in_channel'}
+  send_message(channel_id,customer,template,ask,message)
+
+def send_message(channel_id,customer,template,ask,message):
+  # Uses the web client
   result = client.chat_postMessage(
       channel=channel_id,
-      text="Hello world!"
-      # You could also use a blocks[] array to send richer content
+      # blocks[] array to send richer content that's formatted
+      blocks = [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "Hi :wave:"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "You received a message from CSPAL"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "• Customer: "+customer
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "• Template: "+template
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "• Ask: "+ask
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "• Message: "+message
+          }
+        }
+      ]
+    
+      
   )
   # Print result, which includes information about the message (like TS)
   print(result)
